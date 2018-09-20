@@ -1,0 +1,4 @@
+﻿  main.cpp
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(1189,5): warning MSB8012: TargetPath(C:\Users\Caoimhe\Documents\graphics\Project2\Debug\.exe) does not match the Linker's OutputFile property value (C:\Users\Caoimhe\Documents\graphics\Project2\Debug\Project2.exe). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+  Project2.vcxproj -> C:\Users\Caoimhe\Documents\graphics\Project2\Debug\.exe
+  Project2.vcxproj -> C:\Users\Caoimhe\Documents\graphics\Project2\Debug\Project2.pdb (Partial PDB)
