@@ -202,7 +202,6 @@ void display(){
 	glBindVertexArray(VAO1);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 	glBindVertexArray(VAO2);
-	//glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 	glBindVertexArray(0);
     glutSwapBuffers();
