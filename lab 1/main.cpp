@@ -130,15 +130,34 @@ GLuint CompileShaders()
 	return VBO;
 }*/
 
-GLuint VAO1,VAO2;
+GLuint VAO[2];
 GLuint generateObjectBuffer(GLfloat vertices[], GLfloat colors[]) {
-	//GLuint numVertices = 6;
-	GLuint numVertices = 3;
-	GLuint VBO;
+	GLuint numVertices = 6;
+	//GLuint numVertices = 3;
+	GLuint VBO[2];
 	// Genderate 1 generic buffer object, called VBO
-	/*GLuint VBO[2];
+	//GLuint VBO[2];
 	glGenVertexArrays(2, VAO);
- 	glGenBuffers(2, VBO);*/
+ 	glGenBuffers(2, VBO);
+
+	glBindVertexArray(VAO[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
+	// After binding, we now fill our object with data, everything in "Vertices" goes to the GPU
+	glBufferData(GL_ARRAY_BUFFER, numVertices * 7 * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	// if you have more data besides vertices (e.g., vertex colours or normals), use glBufferSubData to tell the buffer when the vertices array ends and when the colors start
+	glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices * 3 * sizeof(GLfloat), vertices);
+	glBufferSubData(GL_ARRAY_BUFFER, numVertices * 3 * sizeof(GLfloat), numVertices * 4 * sizeof(GLfloat), colors); 
+
+	glBindVertexArray(VAO[1]);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
+	// After binding, we now fill our object with data, everything in "Vertices" goes to the GPU
+	glBufferData(GL_ARRAY_BUFFER, numVertices * 7 * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	// if you have more data besides vertices (e.g., vertex colours or normals), use glBufferSubData to tell the buffer when the vertices array ends and when the colors start
+	glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices * 3 * sizeof(GLfloat), vertices);
+	glBufferSubData(GL_ARRAY_BUFFER, numVertices * 3 * sizeof(GLfloat), numVertices * 4 * sizeof(GLfloat), colors);
+
 	// In OpenGL, we bind (make active) the handle to a target name and then execute commands on that target
 	// Buffer will contain an array of vertices 
 	/*glGenVertexArrays(1, &VAO1);
@@ -146,7 +165,7 @@ GLuint generateObjectBuffer(GLfloat vertices[], GLfloat colors[]) {
 	glBindVertexArray(VAO1);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO1);*/
 	// After binding, we now fill our object with data, everything in "Vertices" goes to the GPU
-	glGenBuffers(1, &VBO);
+	/*glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, numVertices*7*sizeof(GLfloat), NULL, GL_STATIC_DRAW);
 	// if you have more data besides vertices (e.g., vertex colours or normals), use glBufferSubData to tell the buffer when the vertices array ends and when the colors start
@@ -175,12 +194,12 @@ GLuint generateObjectBuffer(GLfloat vertices[], GLfloat colors[]) {
 	glBufferSubData(GL_ARRAY_BUFFER, numVertices * 3 * sizeof(GLfloat), numVertices * 4 * sizeof(GLfloat), colors);*/
 
 
-	return VBO;
+	return VBO[0];
 }
 
 void linkCurrentBuffertoShader(GLuint shaderProgramID){
-	//GLuint numVertices = 6;
-	GLuint numVertices = 3;
+	GLuint numVertices = 6;
+	//GLuint numVertices = 3;
 	// find the location of the variables that we will be using in the shader program
 	GLuint positionID = glGetAttribLocation(shaderProgramID, "vPosition");
 	GLuint colorID = glGetAttribLocation(shaderProgramID, "vColor");
@@ -199,10 +218,11 @@ void display(){
 
 	glClear(GL_COLOR_BUFFER_BIT);
 	// NB: Make the call to draw the geometry in the currently activated vertex buffer. This is where the GPU starts to work!
-	glBindVertexArray(VAO1);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-	glBindVertexArray(VAO2);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glBindVertexArray(VAO[0]);
+	//glDrawArrays(GL_TRIANGLES, 0, 3);
+	glBindVertexArray(VAO[1]);
+	//glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
     glutSwapBuffers();
 }
@@ -213,10 +233,10 @@ void init()
 	// Create 3 vertices that make up a triangle that fits on the viewport 
 	GLfloat vertices1[] = {-1.0f, -1.0f, 0.0f,
 			-0.5f, 1.0f, 0.0f,
-			0.0f, -1.0f, 0.0f/*,
+			0.0f, -1.0f, 0.0f,
 		0.0f, -1.0f, 0.0f,
 		0.5f, 1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f*/ };
+		1.0f, -1.0f, 0.0f };
 
 	GLfloat vertices2[] = { 
 		0.0f, -1.0f, 0.0f,
@@ -226,29 +246,29 @@ void init()
 	GLfloat colors[] = {0.0f, 1.0f, 0.0f, 1.0f,
 			1.0f, 0.0f, 0.0f, 1.0f,
 			0.0f, 0.0f, 1.0f, 1.0f,
-		/*0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
 		1.0f, 0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f*/ };
+		0.0f, 0.0f, 1.0f, 1.0f};
 	// Set up the shaders
 	GLuint shaderProgramID = CompileShaders();
+	generateObjectBuffer(vertices1, colors);
 	// Put the vertices and colors into a vertex buffer object
-	GLuint VBO1,VBO2;
-	glGenVertexArrays(1, &VAO1);
+	/*GLuint VBO1,VBO2;
+	glGenVertexArrays(2, VAO);
 	glGenBuffers(1, &VBO1);
-	glBindVertexArray(VAO1);
+	glBindVertexArray(VAO[0]);
 	VBO1 = generateObjectBuffer(vertices1, colors);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO1);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-	glGenVertexArrays(1, &VAO2);
 	glGenBuffers(1, &VBO2);
-	glBindVertexArray(VAO2);
+	glBindVertexArray(VAO[2]);
 	VBO2 = generateObjectBuffer(vertices2, colors);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	//generateObjectBuffer(vertices2, colors);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)3);
+	//generateObjectBuffer(vertices2, colors);*/
 	// Link the current buffer to the shader
 	linkCurrentBuffertoShader(shaderProgramID);	
 }
