@@ -114,8 +114,9 @@ GLuint CompileShaders()
 
 // VBO Functions - click on + to expand
 #pragma region VBO_FUNCTIONS
+GLuint VAO[2];
 GLuint generateObjectBuffer(GLfloat vertices[], GLfloat colors[]) {
-	GLuint numVertices = 6;
+	GLuint numVertices = 3;
 	// Genderate 1 generic buffer object, called VBO
 	GLuint VBO;
 	glGenBuffers(1, &VBO);
@@ -131,7 +132,7 @@ GLuint generateObjectBuffer(GLfloat vertices[], GLfloat colors[]) {
 }
 
 void linkCurrentBuffertoShader(GLuint shaderProgramID) {
-	GLuint numVertices = 6;
+	GLuint numVertices = 3;
 	// find the location of the variables that we will be using in the shader program
 	GLuint positionID = glGetAttribLocation(shaderProgramID, "vPosition");
 	GLuint colorID = glGetAttribLocation(shaderProgramID, "vColor");
@@ -150,7 +151,10 @@ void display() {
 
 	glClear(GL_COLOR_BUFFER_BIT);
 	// NB: Make the call to draw the geometry in the currently activated vertex buffer. This is where the GPU starts to work!
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(VAO[0]);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glBindVertexArray(VAO[1]);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 	glutSwapBuffers();
 }
 
@@ -158,23 +162,27 @@ void display() {
 void init()
 {
 	// Create 3 vertices that make up a triangle that fits on the viewport 
-	GLfloat vertices[] = { -1.0f, -1.0f, 0.0f,
+	GLfloat vertices1[] = { -1.0f, -1.0f, 0.0f,
 		-0.5f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f};
+
+	GLfloat vertices2[] = { 0.0f, 0.0f, 0.0f,
 		0.5f, 1.0f, 0.0f,
 		1.0f, -1.0f, 0.0f };
 	// Create a color array that identfies the colors of each vertex (format R, G, B, A)
 	GLfloat colors[] = { 0.0f, 1.0f, 0.0f, 1.0f,
 		1.0f, 0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f };
+		0.0f, 0.0f, 1.0f, 1.0f};
 	// Set up the shaders
 	GLuint shaderProgramID = CompileShaders();
 	// Put the vertices and colors into a vertex buffer object
-	generateObjectBuffer(vertices, colors);
+	glGenVertexArrays(2, VAO);//create VAO
+	glBindVertexArray(VAO[0]);//bind vertex array to use i
+	generateObjectBuffer(vertices1, colors);
+	linkCurrentBuffertoShader(shaderProgramID);
+
+	glBindVertexArray(VAO[1]);
+	generateObjectBuffer(vertices2, colors);
 	// Link the current buffer to the shader
 	linkCurrentBuffertoShader(shaderProgramID);
 }
