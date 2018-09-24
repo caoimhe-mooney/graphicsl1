@@ -39,31 +39,6 @@ void main()                                                               \n\
 FragColor = color;									 \n\
 }";
 
-static const char* pVS2 = "                                                    \n\
-#version 330                                                                  \n\
-                                                                              \n\
-in vec3 vPosition;															  \n\
-in vec4 vColor;																  \n\
-out vec4 color;																 \n\
-                                                                              \n\
-                                                                               \n\
-void main()                                                                     \n\
-{                                                                                \n\
-    gl_Position = vec4(vPosition.x, vPosition.y, vPosition.z, 1.0);  \n\
-	color = vColor;							\n\
-}";
-
-// Fragment Shader
-// Note: no input in this shader, it just outputs the colour of all fragments, in this case set to red (format: R, G, B, A).
-static const char* pFS2 = "                                              \n\
-#version 330                                                            \n\
-in vec4 color;                                                                        \n\
-out vec4 FragColor;                                                      \n\
-                                                                          \n\
-void main()                                                               \n\
-{                                                                          \n\
-FragColor = vec4(1.0, 1.0, 0.0, 1.0);									 \n\
-}";
 
 // Shader Functions- click on + to expand
 #pragma region SHADER_FUNCTIONS
@@ -107,53 +82,6 @@ GLuint CompileShaders()
 	AddShader(shaderProgramID, pVS, GL_VERTEX_SHADER);
 	AddShader(shaderProgramID, pFS, GL_FRAGMENT_SHADER);
 
-
-
-	GLint Success = 0;
-	GLchar ErrorLog[1024] = { 0 };
-
-
-	// After compiling all shader objects and attaching them to the program, we can finally link it
-	glLinkProgram(shaderProgramID);
-	// check for program related errors using glGetProgramiv
-	glGetProgramiv(shaderProgramID, GL_LINK_STATUS, &Success);
-	if (Success == 0) {
-		glGetProgramInfoLog(shaderProgramID, sizeof(ErrorLog), NULL, ErrorLog);
-		fprintf(stderr, "Error linking shader program: '%s'\n", ErrorLog);
-		exit(1);
-	}
-
-	// program has been successfully linked but needs to be validated to check whether the program can execute given the current pipeline state
-	glValidateProgram(shaderProgramID);
-	// check for program related errors using glGetProgramiv
-	glGetProgramiv(shaderProgramID, GL_VALIDATE_STATUS, &Success);
-	if (!Success) {
-		glGetProgramInfoLog(shaderProgramID, sizeof(ErrorLog), NULL, ErrorLog);
-		fprintf(stderr, "Invalid shader program: '%s'\n", ErrorLog);
-		exit(1);
-	}
-	// Finally, use the linked shader program
-	// Note: this program will stay in effect for all draw calls until you replace it with another or explicitly disable its use
-	glUseProgram(shaderProgramID);
-	return shaderProgramID;
-}
-
-GLuint CompileShaders2()
-{
-	//Start the process of setting up our shaders by creating a program ID
-	//Note: we will link all the shaders together into this ID
-	GLuint shaderProgramID = glCreateProgram();
-	if (shaderProgramID == 0) {
-		fprintf(stderr, "Error creating shader program\n");
-		exit(1);
-	}
-
-	// Create two shader objects, one for the vertex, and one for the fragment shader
-	AddShader(shaderProgramID, pVS2, GL_VERTEX_SHADER);
-	AddShader(shaderProgramID, pFS2, GL_FRAGMENT_SHADER);
-
-
-
 	GLint Success = 0;
 	GLchar ErrorLog[1024] = { 0 };
 
@@ -186,29 +114,10 @@ GLuint CompileShaders2()
 
 // VBO Functions - click on + to expand
 #pragma region VBO_FUNCTIONS
-/*GLuint generateObjectBuffer(GLfloat vertices[], GLfloat colors[]) {
-GLuint numVertices = 6;
-// Genderate 1 generic buffer object, called VBO
-GLuint VBO;
-glGenBuffers(1, &VBO);
-// In OpenGL, we bind (make active) the handle to a target name and then execute commands on that target
-// Buffer will contain an array of vertices
-glBindBuffer(GL_ARRAY_BUFFER, VBO);
-// After binding, we now fill our object with data, everything in "Vertices" goes to the GPU
-glBufferData(GL_ARRAY_BUFFER, numVertices * 7 * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
-// if you have more data besides vertices (e.g., vertex colours or normals), use glBufferSubData to tell the buffer when the vertices array ends and when the colors start
-glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices * 3 * sizeof(GLfloat), vertices);
-glBufferSubData(GL_ARRAY_BUFFER, numVertices * 3 * sizeof(GLfloat), numVertices * 4 * sizeof(GLfloat), colors);
-return VBO;
-}*/
-GLuint VAO[2];
-
 GLuint generateObjectBuffer(GLfloat vertices[], GLfloat colors[]) {
 	GLuint numVertices = 3;
-	//GLuint numVertices = 6;
 	// Genderate 1 generic buffer object, called VBO
 	GLuint VBO;
-
 	glGenBuffers(1, &VBO);
 	// In OpenGL, we bind (make active) the handle to a target name and then execute commands on that target
 	// Buffer will contain an array of vertices 
@@ -216,27 +125,12 @@ GLuint generateObjectBuffer(GLfloat vertices[], GLfloat colors[]) {
 	// After binding, we now fill our object with data, everything in "Vertices" goes to the GPU
 	glBufferData(GL_ARRAY_BUFFER, numVertices * 7 * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
 	// if you have more data besides vertices (e.g., vertex colours or normals), use glBufferSubData to tell the buffer when the vertices array ends and when the colors start
-	glVertexAttribPointer((GLuint)0, 1, GL_FLOAT, GL_FALSE, 0, 0);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices * 3 * sizeof(GLfloat), vertices);
 	glBufferSubData(GL_ARRAY_BUFFER, numVertices * 3 * sizeof(GLfloat), numVertices * 4 * sizeof(GLfloat), colors);
-
-	/*glBindVertexArray(VAO[1]);//bind vertex array to use it
-	// In OpenGL, we bind (make active) the handle to a target name and then execute commands on that target
-	// Buffer will contain an array of vertices
-	glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
-	// After binding, we now fill our object with data, everything in "Vertices" goes to the GPU
-	glBufferData(GL_ARRAY_BUFFER, numVertices * 7 * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
-	// if you have more data besides vertices (e.g., vertex colours or normals), use glBufferSubData to tell the buffer when the vertices array ends and when the colors start
-	glVertexAttribPointer((GLuint)0, 1, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices * 3 * sizeof(GLfloat), vertices);
-	glBufferSubData(GL_ARRAY_BUFFER, numVertices * 3 * sizeof(GLfloat), numVertices * 4 * sizeof(GLfloat), colors);*/
-
 	return VBO;
 }
 
 void linkCurrentBuffertoShader(GLuint shaderProgramID) {
-	//GLuint numVertices = 3;
 	GLuint numVertices = 3;
 	// find the location of the variables that we will be using in the shader program
 	GLuint positionID = glGetAttribLocation(shaderProgramID, "vPosition");
@@ -249,7 +143,6 @@ void linkCurrentBuffertoShader(GLuint shaderProgramID) {
 	glEnableVertexAttribArray(colorID);
 	glVertexAttribPointer(colorID, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(numVertices * 3 * sizeof(GLfloat)));
 }
-
 #pragma endregion VBO_FUNCTIONS
 
 
@@ -257,18 +150,7 @@ void display() {
 
 	glClear(GL_COLOR_BUFFER_BIT);
 	// NB: Make the call to draw the geometry in the currently activated vertex buffer. This is where the GPU starts to work!
-	glBindVertexArray(VAO[0]);
-	glUseProgram(CompileShaders());
 	glDrawArrays(GL_TRIANGLES, 0, 3);
-	glBindVertexArray(VAO[1]);
-	glUseProgram(CompileShaders2());
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-	//glDrawArrays(GL_TRIANGLES, 0, 6);
-	glEnableVertexAttribArray(0);
-	glBindVertexArray(0);
-
-	//glDrawArrays(GL_TRIANGLES, 0, 3);
-	//glDrawArrays(GL_TRIANGLES, 0, 6);
 	glutSwapBuffers();
 }
 
@@ -276,40 +158,19 @@ void display() {
 void init()
 {
 	// Create 3 vertices that make up a triangle that fits on the viewport 
-	GLfloat vertices1[] = { -0.5f, -1.0f, 0.0f,
-		-0.5f, 1.0f, 0.0f,
-		0.0f, -0.5f, 0.0f,
-		/*0.0f, -0.5f, 0.0f,
-		0.5f, 1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f*/ };
-	GLfloat vertices2[] = { 0.0f, -0.5f, 0.0f,
-		0.5f, 1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f };
+	GLfloat vertices[] = { -1.0f, -1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f };
 	// Create a color array that identfies the colors of each vertex (format R, G, B, A)
 	GLfloat colors[] = { 0.0f, 1.0f, 0.0f, 1.0f,
 		1.0f, 0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
-		/*0.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f*/ };
-
-	GLfloat colors2[] = { 1.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 0.0f, 1.0f };
+		0.0f, 0.0f, 1.0f, 1.0f };
 	// Set up the shaders
 	GLuint shaderProgramID = CompileShaders();
 	// Put the vertices and colors into a vertex buffer object
-	glGenVertexArrays(2, VAO);//create VAO
-	glBindVertexArray(VAO[0]);//bind vertex array to use it
-	generateObjectBuffer(vertices1, colors);
-	linkCurrentBuffertoShader(shaderProgramID);
-
-	GLuint shaderProgramID2 = CompileShaders2();
-	glBindVertexArray(VAO[1]);//bind vertex array to use it
-	generateObjectBuffer(vertices2, colors);
-	linkCurrentBuffertoShader(shaderProgramID2);
-	//generateObjectBuffer(vertices2, colors);
+	generateObjectBuffer(vertices, colors);
 	// Link the current buffer to the shader
+	linkCurrentBuffertoShader(shaderProgramID);
 }
 
 int main(int argc, char** argv) {
@@ -334,7 +195,7 @@ int main(int argc, char** argv) {
 	// Begin infinite event loop
 	glutMainLoop();
 	return 0;
-
+}
 
 
 
